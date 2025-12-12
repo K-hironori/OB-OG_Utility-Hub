@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAI 統合ユーティリティ</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>ZAI Utility Hub</h1>
+            <p class="description">業務効率化のためのオールインワン・ツールキット</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" onclick="switchTab('obog')">OB・OG確認</button>
+            <button class="tab-btn" onclick="switchTab('year')">卒業年照合</button>
+            <button class="tab-btn" onclick="switchTab('roster')">名簿重複確認</button>
+        </nav>
+
+        <!-- Content Area -->
+        <main>
+            <!-- TAB 1: OB・OG Confirmation -->
+            <section id="tab-obog" class="tab-content active">
+                <div class="card">
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>
+                                <span>全体リスト（マスター）</span>
+                                <span class="badge badge-count" id="obog-master-count">0件</span>
+                            </label>
+                            <textarea id="obog-master" placeholder="検索対象のマスターリストを貼り付けてください..."></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>
+                                <span>確認したい名前リスト</span>
+                                <span class="badge badge-count" id="obog-target-count">0件</span>
+                            </label>
+                            <textarea id="obog-target" placeholder="確認したい名前のリストを貼り付けてください..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="obog-normalize" checked>
+                            <span>空白を無視</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="obog-kanji">
+                            <span>漢字のみ比較</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="obog-fuzzy">
+                            <span>類似マッチ（苗字変更など）</span>
+                        </label>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="clearObOg()">クリア</button>
+                        <button class="btn btn-primary" onclick="runObOgCheck()">照合実行</button>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="obog-results" class="results-area">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="obog-res-total">0</div>
+                                <div class="stat-label">チェック件数</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="obog-res-found" style="color:var(--success)">0</div>
+                                <div class="stat-label">一致</div>
+                            </div>
+                        </div>
+
+                        <div class="actions" style="margin-bottom: 1rem;">
+                            <button class="btn btn-secondary" onclick="copyObOgTable()">結果をコピー</button>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="10%">No.</th>
+                                    <th width="50%">名前</th>
+                                    <th width="40%">判定</th>
+                                </tr>
+                            </thead>
+                            <tbody id="obog-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- TAB 2: Graduation Year Match -->
+            <section id="tab-year" class="tab-content">
+                <div class="card">
+                    <div class="input-group">
+                        <label>① 卒業年リスト（コピー元: 氏名 + 卒業年）</label>
+                        <textarea id="year-source"
+                            placeholder="Excelからコピー...&#13;&#10;佐藤 2020&#13;&#10;鈴木 2021"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>② 転記先名簿リスト</label>
+                        <textarea id="year-target" placeholder="Excelからコピー...&#13;&#10;佐藤&#13;&#10;鈴木"></textarea>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="year-convert" checked>
+                            <span>和暦(S/H/R)を西暦に変換</span>
+                        </label>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="clearYear()">クリア</button>
+                        <button class="btn btn-primary" onclick="runYearMatch()">照合・転記実行</button>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="year-results" class="results-area">
+                        <div class="actions" style="margin-bottom:1rem;">
+                            <button class="btn btn-secondary" onclick="copyYearTable()">結果をコピー</button>
+                            <button class="btn btn-secondary" onclick="dlYearCsv()">CSVダウンロード</button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table id="year-table">
+                                <thead>
+                                    <tr>
+                                        <th>氏名</th>
+                                        <th>卒業年</th>
+                                        <th>ステータス</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- TAB 3: Roster Duplicate Check -->
+            <section id="tab-roster" class="tab-content">
+                <div class="card">
+                    <div class="input-group">
+                        <label>名簿リスト (重複チェック)</label>
+                        <textarea id="roster-input" placeholder="リストを貼り付け..."></textarea>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="clearRoster()">クリア</button>
+                        <button class="btn btn-primary" onclick="runRosterCheck()">重複確認</button>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="roster-results" class="results-area">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="roster-total">0</div>
+                                <div class="stat-label">総件数</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="roster-unique">0</div>
+                                <div class="stat-label">ユニーク</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="roster-dupe" style="color:var(--error)">0</div>
+                                <div class="stat-label">重複</div>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>修正済みリスト (重複削除)</label>
+                            <textarea id="roster-clean" readonly style="height:150px; background:#f1f5f9;"></textarea>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-secondary" onclick="copyRosterClean()">修正リストをコピー</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Logic -->
+    <script src="script.js"></script>
+</body>
+
+</html>
