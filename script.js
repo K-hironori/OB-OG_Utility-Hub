@@ -234,6 +234,7 @@ function dlCombinedCsv() {
 function clearRoster() {
     document.getElementById('roster-input').value = '';
     document.getElementById('roster-clean').value = '';
+    document.getElementById('roster-duplicates').value = '';
     document.getElementById('roster-results').classList.remove('show');
 }
 
@@ -244,6 +245,7 @@ function runRosterCheck() {
     const lines = text.split('\n');
     const seen = new Set();
     const uniqueList = [];
+    const duplicateList = [];
     let dupeCount = 0;
 
     lines.forEach(line => {
@@ -253,6 +255,7 @@ function runRosterCheck() {
         const key = trim.replace(/\s+/g, '');
         if (seen.has(key)) {
             dupeCount++;
+            duplicateList.push(trim);
         } else {
             seen.add(key);
             uniqueList.push(trim);
@@ -263,6 +266,7 @@ function runRosterCheck() {
     document.getElementById('roster-unique').innerText = uniqueList.length;
     document.getElementById('roster-dupe').innerText = dupeCount;
 
+    document.getElementById('roster-duplicates').value = duplicateList.join('\n');
     document.getElementById('roster-clean').value = uniqueList.join('\n');
     document.getElementById('roster-results').classList.add('show');
 }
